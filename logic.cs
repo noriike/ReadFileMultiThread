@@ -9,7 +9,7 @@ namespace ReadFileMultiThread
 {
     public class logic
     {
-        const int MAX_THREAD = 4;
+        private int MAX_THREAD = 3;
 
         delegate List<ymdrow> delegateworker();
         List<ymdrow> result = new List<ymdrow>();
@@ -26,6 +26,8 @@ namespace ReadFileMultiThread
                 allfiles.AddRange(f);
             }
 
+            //スレッド数よりファイル数が少なかった場合、ファイル数をスレッド数にする
+            MAX_THREAD = allfiles.Count < MAX_THREAD ? allfiles.Count : MAX_THREAD;
 
             //１スレッドに処理させるファイル数
             int chunksize = allfiles.Count / MAX_THREAD;
@@ -71,9 +73,13 @@ namespace ReadFileMultiThread
         public void WorkComplete(IAsyncResult ar)
         {
             delegateworker dw =(delegateworker)((AsyncResult)ar).AsyncDelegate;
+            Object lockObj = new object();
 
             //ロックが必要？？
-            result.AddRange(dw.EndInvoke(ar));
+            lock (lockObj)
+            {
+                result.AddRange(dw.EndInvoke(ar));
+            }
         }
     }
 }
