@@ -17,7 +17,7 @@ namespace ReadFileMultiThread
         protected void Button1_Click(object sender, EventArgs e)
         {
             logic l = new logic();
-            l.ExecuteAsync();
+            l.ExecuteAsync(@"c:\ssi2\log");
         }
     }
 }

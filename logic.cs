@@ -14,10 +14,10 @@ namespace ReadFileMultiThread
         delegate List<ymdrow> delegateworker();
         List<ymdrow> result = new List<ymdrow>();
 
-        public void ExecuteAsync()
+        public void ExecuteAsync(String path)
         {
             List<string> allfiles = new List<string>();
-            String [] directories=Directory.GetDirectories(@"C:\ssi2\log");
+            String [] directories=Directory.GetDirectories(path);
 
             foreach (var d in directories)
             {
