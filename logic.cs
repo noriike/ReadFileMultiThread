@@ -16,6 +16,8 @@ namespace ReadFileMultiThread
 
         public void ExecuteAsync(String path)
         {
+            result=new List<ymdrow>();
+
             List<string> allfiles = new List<string>();
             String [] directories=Directory.GetDirectories(path);
 
@@ -32,7 +34,7 @@ namespace ReadFileMultiThread
             //１スレッドに処理させるファイル数
             int chunksize = allfiles.Count / MAX_THREAD;
 
-            //ファイル数をスレッド数で均等割りにできない分 最後のスレッドに割り当て
+            //ファイル数をスレッド数で均等割りにできない分 最後のスレッドに追加で割り当て
             int remain = allfiles.Count % MAX_THREAD;
 
             //スレッド数分、分配したファイルを格納する
@@ -66,8 +68,16 @@ namespace ReadFileMultiThread
             //並列処理がすべて終わるまで待機
             while (arl.Where(a =>!a.IsCompleted).Any()) ;
 
-            var aaa = "aa";
-
+            //以下、処理結果の結合処理
+            var gr = result.Select(f => f)
+                           .GroupBy(f => new { f.ymd })
+                           .Select(fg =>
+                                    new ymdrow(fg.Key.ToString(),
+                                               fg.Sum(w => int.Parse(w.value1)).ToString(), 
+                                               fg.Sum(w => int.Parse(w.value2)).ToString()
+                                               )
+                                   )
+                           .OrderBy(f => f.ymd);
         }
 
         public void WorkComplete(IAsyncResult ar)
@@ -78,6 +88,7 @@ namespace ReadFileMultiThread
             //ロックが必要？？
             lock (lockObj)
             {
+                //返り値を格納する
                 result.AddRange(dw.EndInvoke(ar));
             }
         }
