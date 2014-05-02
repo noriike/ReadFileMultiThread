@@ -4,18 +4,22 @@ using System.Linq;
 using System.Web;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
-
+using System.Diagnostics;
 namespace ReadFileMultiThread
 {
     public class logic
     {
-        private int MAX_THREAD = 3;
+        private int MAX_THREAD = 6;
 
         delegate List<ymdrow> delegateworker();
         List<ymdrow> result = new List<ymdrow>();
 
         public void ExecuteAsync(String path)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            
+
             result=new List<ymdrow>();
 
             List<string> allfiles = new List<string>();
@@ -78,6 +82,9 @@ namespace ReadFileMultiThread
                                                )
                                    )
                            .OrderBy(f => f.ymd);
+
+            sw.Stop();
+            Debug.WriteLine(sw.ElapsedMilliseconds);
         }
 
         public void WorkComplete(IAsyncResult ar)
