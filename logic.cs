@@ -9,9 +9,10 @@ namespace ReadFileMultiThread
 {
     public class logic
     {
-        private int MAX_THREAD = 6;
+        private int MAX_THREAD = 4;
 
         delegate List<ymdrow> delegateworker();
+        delegateworker dw;
         List<ymdrow> result = new List<ymdrow>();
 
         public void ExecuteAsync(String path)
@@ -42,7 +43,6 @@ namespace ReadFileMultiThread
             int remain = allfiles.Count % MAX_THREAD;
 
             //スレッド数分、分配したファイルを格納する
-            List<delegateworker> wl = new List<delegateworker>();
             for (int i = 1; i <= MAX_THREAD; i++)
             {
                 List<string> d = new List<string>();
@@ -59,15 +59,13 @@ namespace ReadFileMultiThread
                 }
 
                 Worker w = new Worker(d);
-                wl.Add(new delegateworker(w.Dowork));
+                dw += w.Dowork;
             }
 
             //並列処理開始
-            List<IAsyncResult> arl = new List<IAsyncResult>();
-            foreach (var w in wl)
-            {
-                arl.Add(w.BeginInvoke(new AsyncCallback(WorkComplete), null));
-            }
+            var arl = dw.GetInvocationList().Select(d => 
+                                                       (d as delegateworker).BeginInvoke(new AsyncCallback(WorkComplete), null))
+                                            .ToArray();
 
             //並列処理がすべて終わるまで待機
             while (arl.Where(a =>!a.IsCompleted).Any()) ;
